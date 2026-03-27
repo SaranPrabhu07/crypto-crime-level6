@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Level 6 — Crypto Crime</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+
+    /* ── ENTRY SCREEN ── */
+    .entry-screen {
+      position:fixed;inset:0;z-index:7000;background:var(--bg);
+      display:flex;align-items:center;justify-content:center;padding:2rem;
+    }
+    .entry-card {
+      width:100%;max-width:480px;
+      background:rgba(0,15,0,0.92);
+      border:1px solid var(--border-bright);
+      border-top:3px solid var(--cyan);
+      border-radius:8px;padding:2.5rem 2rem;text-align:center;
+      box-shadow:0 0 80px rgba(0,255,247,0.12);
+      animation:fadeUp 0.5s ease both;
+    }
+    .entry-icon { font-size:3rem;margin-bottom:1rem; }
+    .entry-crown {
+      font-size:0.6rem;letter-spacing:0.4em;text-transform:uppercase;
+      color:var(--cyan);border:1px solid rgba(0,255,247,0.3);
+      padding:0.3rem 1rem;border-radius:2px;display:inline-block;
+      margin-bottom:1rem;background:rgba(0,255,247,0.05);
+    }
+    .entry-title {
+      font-family:var(--font-display);font-size:1.1rem;font-weight:900;
+      color:var(--green);letter-spacing:0.15em;margin-bottom:0.3rem;
+      text-shadow:0 0 15px rgba(0,255,65,0.4);
+    }
+    .entry-sub { font-size:0.62rem;color:var(--text-dim);letter-spacing:0.2em;margin-bottom:1.5rem; }
+    .entry-msg {
+      font-size:0.85rem;color:var(--text-dim);line-height:1.9;
+      margin-bottom:1.5rem;text-align:left;
+      background:rgba(0,255,65,0.04);
+      border:1px solid var(--border-bright);
+      border-left:3px solid var(--green);
+      padding:1rem 1.25rem;
+    }
+    .entry-msg strong { color:var(--text); }
+    .entry-msg .criminal { color:var(--red);font-family:var(--font-display);font-size:0.82em; }
+    .entry-msg .highlight { color:var(--cyan);font-family:var(--font-display);font-size:0.82em; }
+
+    /* ── CHECK-IN ── */
+    .checkin-screen {
+      position:fixed;inset:0;z-index:6000;background:var(--bg);
+      display:flex;align-items:center;justify-content:center;padding:2rem;
+    }
+    .checkin-card {
+      width:100%;max-width:400px;background:rgba(0,15,0,0.9);
+      border:1px solid var(--border-bright);border-top:3px solid var(--green);
+      border-radius:6px;padding:2.5rem 2rem;text-align:center;
+      box-shadow:0 0 60px var(--green-glow);animation:fadeUp 0.4s ease both;
+    }
+    .checkin-icon { font-size:2.5rem;margin-bottom:1rem; }
+    .checkin-title { font-family:var(--font-display);font-size:1rem;font-weight:900;color:var(--green);letter-spacing:0.2em;margin-bottom:0.3rem; }
+    .checkin-sub { font-size:0.62rem;color:var(--text-dim);letter-spacing:0.2em;margin-bottom:1.5rem; }
+    .checkin-desc { font-size:0.78rem;color:var(--text-dim);line-height:1.8;margin-bottom:1.5rem; }
+    .checkin-desc strong { color:var(--text); }
+    .checkin-input {
+      width:100%;background:rgba(0,0,0,0.5);border:1.5px solid var(--border-bright);
+      border-radius:3px;padding:0.85rem 1rem;font-family:var(--font-mono);
+      font-size:1.1rem;color:var(--green);outline:none;caret-color:var(--green);
+      text-align:center;letter-spacing:0.25em;text-transform:uppercase;
+      transition:border-color 0.2s,box-shadow 0.2s;margin-bottom:0.5rem;
+    }
+    .checkin-input:focus { border-color:var(--green);box-shadow:0 0 15px rgba(0,255,65,0.2); }
+    .checkin-input.error { border-color:var(--red); }
+    .checkin-error { font-size:0.7rem;color:var(--red);margin-bottom:0.75rem;display:none; }
+    .checkin-btn { width:100%;padding:0.9rem;font-size:0.85rem;margin-top:0.25rem; }
+    .checkin-footer { font-size:0.6rem;color:var(--text-dim);margin-top:1.5rem;letter-spacing:0.15em; }
+
+    /* ── TOP BAR ── */
+    .top-bar { position:fixed;top:56px;left:0;right:0;z-index:900;background:rgba(2,12,2,0.95);border-bottom:1px solid var(--border);padding:0.5rem 2rem;display:flex;align-items:center;justify-content:space-between;font-size:0.68rem;letter-spacing:0.1em;backdrop-filter:blur(6px); }
+    .top-bar-tiles { display:flex;gap:0.3rem; }
+    .mini-tile { width:26px;height:30px;border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.72rem;color:var(--text-dim);background:rgba(0,0,0,0.3); }
+    .mini-tile.lit { border-color:var(--green);color:var(--green);background:rgba(0,255,65,0.1);box-shadow:0 0 6px rgba(0,255,65,0.3); }
+
+    /* ── ANAGRAM PUZZLE ── */
+    .anagram-section { margin-bottom:1.5rem; }
+    .anagram-row-wrap { margin-bottom:1.25rem; }
+    .anagram-row-label {
+      font-size:0.6rem;letter-spacing:0.3em;color:var(--text-dim);
+      text-transform:uppercase;margin-bottom:0.5rem;text-align:center;
+    }
+    .anagram-instruction {
+      font-size:0.75rem;color:var(--text-dim);
+      margin-bottom:1rem;line-height:1.7;
+    }
+    .anagram-tiles {
+      display:flex;gap:0.5rem;justify-content:center;
+      flex-wrap:wrap;margin-bottom:0.75rem;
+      user-select:none;
+    }
+    .anagram-tile {
+      width:56px;height:64px;
+      border:2px solid var(--border-bright);
+      border-radius:4px;
+      display:flex;align-items:center;justify-content:center;
+      font-family:var(--font-display);font-size:1.6rem;font-weight:900;
+      color:var(--green);background:rgba(0,20,0,0.7);
+      cursor:grab;
+      transition:border-color 0.2s,box-shadow 0.2s,transform 0.15s;
+      touch-action:none;
+      position:relative;
+    }
+    .anagram-tile:active { cursor:grabbing;transform:scale(1.1);z-index:10; }
+    .anagram-tile.selected {
+      border-color:var(--cyan);
+      box-shadow:0 0 15px rgba(0,255,247,0.4);
+      transform:scale(1.05);
+    }
+    .anagram-tile.correct {
+      border-color:#00ff41;background:rgba(0,255,65,0.15);
+      box-shadow:0 0 15px rgba(0,255,65,0.4);
+      color:var(--green);
+    }
+    .anagram-tile.incorrect {
+      border-color:var(--red);background:rgba(255,0,60,0.1);
+      box-shadow:0 0 10px rgba(255,0,60,0.3);
+      color:var(--red);
+    }
+    .anagram-tile.dragging {
+      opacity:0.5;transform:scale(1.08);
+      border-color:var(--cyan);
+    }
+    .anagram-tile.drag-over {
+      border-color:var(--cyan);
+      box-shadow:0 0 20px rgba(0,255,247,0.5);
+      transform:scale(1.05);
+    }
+    .check-btn {
+      display:block;margin:0.75rem auto 0;
+      padding:0.6rem 2rem;font-size:0.75rem;
+    }
+    .anagram-feedback {
+      text-align:center;font-size:0.72rem;
+      margin-top:0.5rem;min-height:1.2rem;
+      color:var(--text-dim);letter-spacing:0.05em;
+    }
+
+    /* ── HASH SECTION ── */
+    .hash-section {
+      display:none;
+      margin-top:1.5rem;
+      animation:fadeUp 0.5s ease both;
+    }
+    .hash-section.show { display:block; }
+    .hash-box {
+      background:rgba(0,0,0,0.5);
+      border:1px solid var(--border-bright);
+      border-left:3px solid var(--cyan);
+      padding:1rem 1.25rem;
+      font-family:var(--font-mono);
+      font-size:0.68rem;
+      color:var(--cyan);
+      word-break:break-all;
+      letter-spacing:0.05em;
+      line-height:1.8;
+      margin-bottom:0.75rem;
+    }
+    .hash-label {
+      font-size:0.6rem;color:var(--text-dim);
+      letter-spacing:0.3em;text-transform:uppercase;
+      margin-bottom:0.4rem;
+    }
+    .hash-instruction {
+      font-size:0.75rem;color:var(--text-dim);
+      line-height:1.7;margin-bottom:1rem;
+    }
+    .hash-instruction a { color:var(--cyan); }
+
+    /* ── SUSPECT CARDS ── */
+    .suspect-section {
+      display:none;margin-top:1.5rem;
+      animation:fadeUp 0.5s ease both;
+    }
+    .suspect-section.show { display:block; }
+    .suspect-label {
+      font-size:0.6rem;letter-spacing:0.3em;color:var(--text-dim);
+      text-transform:uppercase;margin-bottom:1rem;
+      display:flex;align-items:center;gap:0.5rem;
+    }
+    .suspect-label::after { content:'';flex:1;height:1px;background:var(--border); }
+    .suspect-warning {
+      font-size:0.75rem;color:var(--yellow);
+      margin-bottom:1rem;line-height:1.6;
+      padding:0.6rem 1rem;
+      background:rgba(255,230,0,0.05);
+      border:1px solid rgba(255,230,0,0.2);
+      border-left:3px solid var(--yellow);
+    }
+    .suspect-cards {
+      display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center;
+    }
+    .suspect-card {
+      flex:1;min-width:120px;max-width:160px;
+      background:rgba(0,15,0,0.7);
+      border:1.5px solid var(--border-bright);
+      border-radius:6px;padding:1.25rem 1rem;
+      text-align:center;cursor:pointer;
+      transition:all 0.2s;
+    }
+    .suspect-card:hover {
+      border-color:var(--green);
+      box-shadow:0 0 20px rgba(0,255,65,0.2);
+      transform:translateY(-2px);
+    }
+    .suspect-name {
+      font-family:var(--font-display);font-size:0.9rem;
+      font-weight:700;color:var(--green);
+      letter-spacing:0.1em;margin-bottom:0.3rem;
+    }
+    .suspect-role {
+      font-size:0.62rem;color:var(--text-dim);
+      letter-spacing:0.08em;
+    }
+
+    /* ── WRONG ANSWER SCREEN ── */
+    .wrong-screen {
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,0.97);z-index:5000;
+      flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;gap:1.25rem;padding:2rem;overflow-y:auto;
+    }
+    .wrong-screen.show { display:flex; }
+    .wrong-icon { font-size:3.5rem;animation:shake 0.5s ease; }
+    .wrong-title {
+      font-family:var(--font-display);font-size:clamp(1.5rem,5vw,2.5rem);
+      font-weight:900;color:var(--red);letter-spacing:0.08em;
+      text-shadow:0 0 20px rgba(255,0,60,0.6);
+      animation:glitchRed 4s infinite;
+    }
+    @keyframes glitchRed {
+      0%,90%,100%{text-shadow:0 0 20px rgba(255,0,60,0.6);transform:none}
+      92%{text-shadow:-3px 0 var(--cyan),3px 0 rgba(255,0,60,0.8);transform:skewX(-2deg)}
+      94%{text-shadow:0 0 20px rgba(255,0,60,0.6);transform:none}
+    }
+    .wrong-divider { width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent); }
+    .wrong-stamp {
+      font-family:var(--font-display);font-size:0.65rem;font-weight:900;
+      letter-spacing:0.3em;color:var(--red);border:2px solid var(--red);
+      padding:0.35rem 1rem;border-radius:2px;display:inline-block;
+      opacity:0.85;transform:rotate(-1.5deg);
+    }
+    .wrong-msg {
+      max-width:520px;font-size:0.88rem;color:var(--text-dim);
+      line-height:1.9;text-align:left;
+      background:rgba(255,0,60,0.04);
+      border:1px solid rgba(255,0,60,0.2);
+      border-left:3px solid var(--red);
+      padding:1.25rem 1.5rem;
+    }
+    .wrong-msg strong { color:var(--text); }
+    .wrong-msg .aswin { color:var(--cyan);font-family:var(--font-display);font-size:0.85em; }
+    .wrong-msg .saroo { color:var(--red);font-family:var(--font-display);font-size:0.85em; }
+
+    /* ── VICTORY SCREEN ── */
+    .victory-screen {
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,0.98);z-index:5000;
+      flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;gap:1.5rem;padding:2rem;overflow-y:auto;
+    }
+    .victory-screen.show { display:flex; }
+    .victory-icon { font-size:4rem;animation:bounce 1s infinite; }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    .victory-title {
+      font-family:var(--font-display);
+      font-size:clamp(2rem,8vw,4rem);font-weight:900;
+      color:var(--green);letter-spacing:0.08em;line-height:1;
+      text-shadow:0 0 30px var(--green),0 0 80px rgba(0,255,65,0.4);
+      animation:glitchLoop 5s infinite;
+    }
+    @keyframes glitchLoop {
+      0%,92%,100%{text-shadow:0 0 30px var(--green),0 0 80px rgba(0,255,65,0.4);transform:none}
+      93%{text-shadow:-3px 0 var(--cyan),3px 0 var(--red);transform:skewX(-1deg)}
+      95%{text-shadow:0 0 30px var(--green);transform:none}
+    }
+    .victory-sub {
+      font-family:var(--font-vt);font-size:clamp(1.2rem,4vw,1.8rem);
+      color:var(--cyan);letter-spacing:0.15em;
+    }
+    .victory-divider { width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent); }
+    .victory-msg {
+      max-width:520px;font-size:0.88rem;color:var(--text-dim);
+      line-height:1.9;
+      background:rgba(0,255,65,0.05);
+      border:1px solid var(--border-bright);
+      border-left:3px solid var(--green);
+      padding:1.25rem 1.5rem;text-align:left;
+    }
+    .victory-msg strong { color:var(--text); }
+    .victory-msg .name { color:var(--green);font-family:var(--font-display);font-size:0.82em; }
+    .victory-location {
+      font-family:var(--font-vt);font-size:1.8rem;color:var(--cyan);
+      text-shadow:0 0 15px var(--cyan);
+      border:1px solid rgba(0,255,247,0.3);
+      padding:0.75rem 2rem;background:rgba(0,255,247,0.04);
+    }
+
+    /* FAAH INPUT */
+    .faah-wrap {
+      display:flex;flex-direction:column;align-items:center;gap:0.75rem;
+      width:100%;max-width:400px;
+    }
+    .faah-label { font-size:0.65rem;letter-spacing:0.3em;color:var(--text-dim);text-transform:uppercase; }
+    .faah-input {
+      width:100%;background:rgba(0,0,0,0.6);
+      border:1.5px solid var(--border-bright);border-radius:3px;
+      padding:0.85rem 1rem;font-family:var(--font-display);
+      font-size:1.2rem;color:var(--green);outline:none;
+      caret-color:var(--green);text-align:center;
+      letter-spacing:0.3em;text-transform:uppercase;
+      transition:border-color 0.2s,box-shadow 0.2s;
+    }
+    .faah-input:focus { border-color:var(--green);box-shadow:0 0 20px rgba(0,255,65,0.3); }
+    .faah-feedback { font-size:0.72rem;color:var(--red);min-height:1.2rem; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+    @keyframes letterPop { from{opacity:0;transform:scale(0.3) rotate(-10deg)} to{opacity:1;transform:scale(1) rotate(0)} }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════
+     ENTRY SCREEN
+══════════════════════ -->
+<div class="entry-screen" id="entryScreen" style="display:none;">
+  <div class="entry-card">
+    <div class="entry-icon">🏆</div>
+    <div class="entry-crown">// THE FINAL ROUND</div>
+    <div class="entry-title">YOU MADE IT.</div>
+    <div class="entry-sub">// CSE  · LEVEL 6</div>
+    <div class="entry-msg">
+      Six levels. Six ciphers. Six chances for
+      <span class="criminal">THE CRIMINAL</span> to stop you.<br/><br/>
+      And yet — here you are. Back where it all began.<br/><br/>
+      The truth is one puzzle away.
+      <strong>The criminal's name is in your hands.</strong>
+      You've been carrying the letters all along.<br/><br/>
+      <span class="highlight">One last game.</span>
+      <strong>Don't overthink it. Or do. CRIMINAL's counting on it.</strong>
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:0.9rem;font-size:0.85rem;" onclick="showCheckin()">
+      ↳ Enter the Final Round
+    </button>
+    <div class="checkin-footer">MINDKRAFT · CRYPTO CRIME · THE END</div>
+  </div>
+</div>
+
+<!-- ══════════════════════
+     CHECK-IN
+══════════════════════ -->
+<div class="checkin-screen" id="checkinScreen" style="display:none;">
+  <div class="checkin-card">
+    <div class="checkin-icon">🔎</div>
+    <div class="checkin-title">FINAL CHECK-IN</div>
+    <div class="checkin-sub">// LEVEL 6 · ECE GALLERY HALL</div>
+    <div class="checkin-desc">
+      Enter your <strong>Team ID</strong> to begin the final round.
+      This is it. Make it count.
+    </div>
+    <input type="text" class="checkin-input" id="checkinId"
+      placeholder="MK26__" maxlength="8" autocomplete="off"/>
+    <div class="checkin-error" id="checkinError">Invalid Team ID. Check with your organiser.</div>
+    <button class="btn btn-primary checkin-btn" onclick="doCheckin()">
+      ↳ Begin Final Round
+    </button>
+    <div class="checkin-footer">MINDKRAFT · CRYPTO CRIME</div>
+  </div>
+</div>
+
+<!-- ══════════════════════
+     WRONG ANSWER SCREEN (SAROO selected)
+══════════════════════ -->
+<div class="wrong-screen" id="wrongScreen">
+  <div class="wrong-icon">💀</div>
+  <div class="wrong-title">WRONG.<br/>SO WRONG.</div>
+  <div class="wrong-divider"></div>
+  <div class="wrong-stamp">CASE CLOSED — INCORRECTLY</div>
+  <div class="wrong-msg">
+    You chose wrong.<br/><br/>
+    You chased a ghost through six levels —
+    decoded ciphers, cracked poems, saw through illusions —
+    and at the very last moment, you pointed at the
+    <strong>name that was designed to fool you.</strong><br/><br/>
+    <span class="aswin">SARAN</span> was the one you were looking for.<br/><br/>
+    Every cipher you cracked? <span class="aswin">SARAN</span> designed it.
+    Every trap you fell into? <span class="aswin">SARAN</span> placed it.
+    The optical illusion, the poem on the wall,
+    the video with the misleading filename —
+    <strong>all SARAN.</strong><br/><br/>
+    The hash doesn't lie. <strong>SARAN</strong> was the criminal all along.
+    And you had the letters the entire time.
+  </div>
+</div>
+
+<!-- ══════════════════════
+     VICTORY SCREEN
+══════════════════════ -->
+<div class="victory-screen" id="victoryScreen">
+  <div class="victory-icon">🎉</div>
+  <div class="victory-title">CASE CLOSED.</div>
+  <div class="victory-sub">Criminal Exposed.</div>
+  <div class="victory-divider"></div>
+  <div class="victory-msg">
+    <span class="name">SARAN</span> has been exposed.<br/><br/>
+    You saw through every trap. Every cipher. Every misdirection.
+    While others chased ghosts, you followed the truth —
+    <strong>all the way back to where it started.</strong><br/><br/>
+    Head to <strong style="color:var(--cyan)">ECE Gallery Hall</strong> right now.
+    Find the keyword — the nature of this event as mentioned by the admin.<br/><br/>
+    Type it below to claim your victory.
+  </div>
+
+  <div class="victory-location">ECE GALLERY HALL</div>
+
+  <div class="faah-wrap">
+    <div class="faah-label">// Enter the funny word — the nature of this event</div>
+    <input type="text" class="faah-input" id="faahInput"
+      placeholder="_ _ _ _"
+      maxlength="10" autocomplete="off" spellcheck="false"/>
+    <div class="faah-feedback" id="faahFeedback"></div>
+    <button class="btn btn-primary" style="width:100%;padding:0.85rem;font-size:0.85rem;" onclick="checkFaah()">
+      ↳ SUBMIT
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════
+     WINNER SCREEN
+══════════════════════ -->
+<div class="victory-screen" id="winnerScreen" style="background:rgba(0,5,0,0.99);">
+  <div style="font-size:5rem;animation:bounce 0.8s infinite;">🏆</div>
+  <div class="victory-title" style="font-size:clamp(2.5rem,10vw,5rem);">
+    WINNER!
+  </div>
+  <div class="victory-sub">Investigation Complete</div>
+  <div class="victory-divider"></div>
+  <div class="victory-msg" style="text-align:center;">
+    <strong style="color:var(--green);font-size:1.1em;" id="winnerTeamName">Your Team</strong>
+    has cracked the case.<br/><br/>
+    Six levels. Countless traps. One criminal.<br/>
+    And you found them all.<br/><br/>
+    <strong>The entire event was full of</strong>
+    <span style="color:var(--cyan);font-family:var(--font-display);font-size:1.2em;letter-spacing:0.1em;text-shadow:0 0 15px var(--cyan);"> FAAH!</span>
+    <br/><br/>
+    <span style="color:var(--text-dim);font-size:0.82em;">
+      Show this screen to the organisers to claim your prize.
+    </span>
+  </div>
+  <div style="
+    font-family:var(--font-display);font-size:0.65rem;
+    letter-spacing:0.3em;color:var(--text-dim);
+    border:1px solid var(--border);padding:0.5rem 1.5rem;
+    border-radius:2px;margin-top:0.5rem;
+  ">
+    CRYPTO CRIME · MINDKRAFT · CASE #{teamIdDisplay}
+  </div>
+</div>
+
+<!-- ══════════════════════
+     NAVBAR
+══════════════════════ -->
+<nav class="navbar" id="mainNav" style="display:none;">
+  <a href="#" class="nav-logo">CRYPTO<span>CRIME</span></a>
+  <div class="nav-links">
+    <a href="https://crypto-crime-level1.vercel.app/tools.html" target="_blank">Tools</a>
+  </div>
+  <div class="nav-status"><div class="status-dot"></div>LVL 6/6</div>
+</nav>
+
+<!-- ══════════════════════
+     TOP BAR
+══════════════════════ -->
+<div class="top-bar" id="topBar" style="display:none;">
+  <div style="font-size:0.62rem;color:var(--text-dim);letter-spacing:0.08em;">
+    LEVEL 6 / 6 &nbsp;·&nbsp; FINAL ROUND
+  </div>
+  <div class="top-bar-tiles">
+    <div class="mini-tile lit" id="tile0">R</div>
+    <div class="mini-tile lit" id="tile1">A</div>
+    <div class="mini-tile lit" id="tile2">S</div>
+    <div class="mini-tile lit" id="tile3">O</div>
+    <div class="mini-tile lit" id="tile4">O</div>
+  </div>
+</div>
+
+<!-- ══════════════════════
+     MAIN PUZZLE
+══════════════════════ -->
+<div class="level-wrap" id="levelWrap" style="display:none;padding-top:7rem;">
+
+  <div class="progress-bar-wrap">
+    <div class="progress-label"><span>INVESTIGATION PROGRESS</span><span>LEVEL 6 / 6</span></div>
+    <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+  </div>
+
+  <div class="classified-banner">
+    <div class="classified-stamp">FINAL EVIDENCE</div>
+    <div class="level-indicator">FILE 006 OF 006 &nbsp;·&nbsp; EXPOSE THE CRIMINAL</div>
+  </div>
+
+  <div class="classified-file">
+    <div class="file-header">
+      <div class="file-meta">
+        <div class="file-id">CASE #MK-2601 &nbsp;·&nbsp; FINAL FILE</div>
+        <div class="file-title">The Criminal's Name</div>
+      </div>
+      <div class="file-cipher-badge">ANAGRAM + HASH</div>
+    </div>
+
+    <div class="file-body">
+
+      <!-- BRIEFING -->
+      <div class="file-section">
+        <div class="file-section-label">Final Briefing</div>
+        <p class="briefing-text">
+          You've been carrying the evidence all along.
+          Five letters collected across six locations —
+          each one a fragment of the criminal's name.<br/><br/>
+          <strong>Rearrange them. Spell the name. Expose THE CRIMINAL.</strong><br/><br/>
+          <span style="color:var(--text-dim);font-size:0.8rem;">
+            ↳ Drag and drop the tiles to arrange them in the correct order.
+            Green = correct position. Red = wrong position.
+          </span>
+        </p>
+      </div>
+
+      <!-- ANAGRAM PUZZLE -->
+      <div class="file-section">
+        <div class="file-section-label">Rearrange the Letters</div>
+        <div class="anagram-section">
+          <div class="anagram-row-wrap">
+            <div class="anagram-row-label">Row 1 — Part A</div>
+            <div class="anagram-tiles" id="anagramRow1">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+          <div class="anagram-row-wrap">
+            <div class="anagram-row-label">Row 2 — Part B</div>
+            <div class="anagram-tiles" id="anagramRow2">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+          <button class="btn btn-outline check-btn" onclick="checkArrangement()">
+            Check Arrangement
+          </button>
+          <div class="anagram-feedback" id="anagramFeedback"></div>
+        </div>
+      </div>
+
+      <!-- HASH SECTION — shown after correct arrangement -->
+      <div class="hash-section" id="hashSection">
+        <div class="file-section-label">Verify with Hash</div>
+        <div class="hash-label">SHA-256 Hash of the Criminal's Name</div>
+        <div class="hash-box">
+          26fa3b270602213185e34db953830e181131d0b08cb50d8b0ab50b17792385c3
+        </div>
+        <div class="hash-instruction">
+          Use the
+          <a href="https://crypto-crime-level1.vercel.app/tools.html"
+            target="_blank">SHA-256 tool</a>
+          on the Tools page to verify. Hash each suspect name below
+          and find the one that matches. Enter names in <strong>ALL CAPS</strong>.
+        </div>
+
+        <!-- SUSPECT CARDS -->
+        <div class="suspect-section show" id="suspectSection">
+          <div class="suspect-label">Suspects</div>
+          <div class="suspect-warning">
+            ⚠ You have <strong>ONE chance</strong> to identify the criminal.
+            Choose carefully. There is no going back.
+          </div>
+          <div class="suspect-cards">
+            <div class="suspect-card" onclick="selectSuspect('SAROO')">
+              <div class="suspect-name">SAROO</div>
+              <div class="suspect-role">POTENTIAL SUSPECT</div>
+            </div>
+            <div class="suspect-card" onclick="selectSuspect('SARAN')">
+              <div class="suspect-name">SARAN</div>
+              <div class="suspect-role">MASKED CRIMINAL</div>
+            </div>
+            <div class="suspect-card" onclick="selectSuspect('ASWIN')">
+              <div class="suspect-name">ASWIN</div>
+              <div class="suspect-role">Innocent Commonor</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="shared.js"></script>
+<script>
+  startBinaryRain(0.05);
+
+  const VALID_IDS = Array.from({ length: 400 }, (_, i) => "MK" + (2601 + i));
+  // Range: MK2601 – MK3000 (400 IDs)
+  const LEVEL    = 6;
+  const CRIMINAL = "SARAN"; // correct suspect — hash matches SARAN (all caps)
+
+  let teamId   = localStorage.getItem("teamId");
+  let teamName = localStorage.getItem("teamName");
+
+  // Level 6: seed structured letters if missing
+  window.addEventListener("DOMContentLoaded", () => {
+    const existing = localStorage.getItem("collectedLetters");
+    let needsSeed = true;
+    if (existing) {
+      try {
+        const p = JSON.parse(existing);
+        if (p && typeof p === "object" && !Array.isArray(p) && p.row1 && p.row1.length > 0) needsSeed = false;
+        if (Array.isArray(p) && p.length > 0) needsSeed = false;
+      } catch(e) {}
+    }
+    if (needsSeed) {
+      localStorage.setItem("collectedLetters", JSON.stringify({
+        row1: ["W","N","S","A","I"],
+        row2: ["R","A","S","O","O"]
+      }));
+    }
+
+    if (!teamId) {
+      document.getElementById("entryScreen").style.display = "flex";
+    } else {
+      showEntry();
+    }
+  });
+
+  function showEntry() {
+    document.getElementById("entryScreen").style.display = "flex";
+  }
+
+  function showCheckin() {
+    document.getElementById("entryScreen").style.display = "none";
+    document.getElementById("checkinScreen").style.display = "flex";
+    document.getElementById("checkinId").addEventListener("keydown", e => {
+      if (e.key === "Enter") doCheckin();
+    });
+  }
+
+  function doCheckin() {
+    const input = document.getElementById("checkinId");
+    const err   = document.getElementById("checkinError");
+    const id    = input.value.trim().toUpperCase();
+
+    err.style.display = "none";
+    input.classList.remove("error");
+
+    if (!VALID_IDS.includes(id)) {
+      err.style.display = "block";
+      input.classList.add("error");
+      input.classList.remove("shake"); void input.offsetWidth; input.classList.add("shake");
+      setTimeout(() => input.classList.remove("shake"), 450);
+      return;
+    }
+
+    localStorage.setItem("teamId",   id);
+    localStorage.setItem("teamName", id);
+    teamId   = id;
+    teamName = id;
+
+    logToSheet({ teamId, teamName, level: LEVEL, letter: "—", action: "level_arrived" });
+    document.getElementById("checkinScreen").style.display = "none";
+    enterLevel();
+  }
+
+  function enterLevel() {
+    document.getElementById("mainNav").style.display   = "flex";
+    document.getElementById("topBar").style.display    = "flex";
+    document.getElementById("levelWrap").style.display = "flex";
+    initAnagram();
+  }
+
+  // ══════════════════════════════════
+  //  TWO-ROW ANAGRAM PUZZLE
+  //  Row 1 (from row1 letters): correct answer = ASWIN
+  //  Row 2 (from row2 letters): correct answer = SAROO
+  // ══════════════════════════════════
+  const CORRECT_R1 = ['A','S','W','I','N'];
+  const CORRECT_R2 = ['S','A','R','O','O'];
+
+  let tilesR1 = ['W','N','S','A','I']; // scramble of ASWIN
+  let tilesR2 = ['O','A','R','O','S']; // scramble of SAROO
+
+  let hasChecked   = false;
+  let suspectLocked = false;
+  let dragSrcRow   = null;
+  let dragSrcIdx   = null;
+
+  function initAnagram() {
+    renderRow("anagramRow1", tilesR1, 1);
+    renderRow("anagramRow2", tilesR2, 2);
+  }
+
+  function renderRow(containerId, tiles, rowNum) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    tiles.forEach((letter, idx) => {
+      const tile = document.createElement("div");
+      tile.className = "anagram-tile";
+      tile.textContent = letter;
+      tile.dataset.idx = idx;
+      tile.dataset.row = rowNum;
+
+      if (hasChecked) {
+        const correct = rowNum === 1 ? CORRECT_R1 : CORRECT_R2;
+        tile.classList.add(tiles[idx] === correct[idx] ? "correct" : "incorrect");
+      }
+
+      // Drag (desktop) — only within same row
+      tile.draggable = true;
+      tile.addEventListener("dragstart", e => {
+        dragSrcRow = rowNum; dragSrcIdx = idx;
+        tile.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+      });
+      tile.addEventListener("dragend", () => tile.classList.remove("dragging"));
+      tile.addEventListener("dragover", e => { e.preventDefault(); tile.classList.add("drag-over"); });
+      tile.addEventListener("dragleave", () => tile.classList.remove("drag-over"));
+      tile.addEventListener("drop", e => {
+        e.preventDefault();
+        tile.classList.remove("drag-over");
+        if (dragSrcRow === rowNum && dragSrcIdx !== null && dragSrcIdx !== idx) {
+          const arr = rowNum === 1 ? tilesR1 : tilesR2;
+          [arr[dragSrcIdx], arr[idx]] = [arr[idx], arr[dragSrcIdx]];
+          hasChecked = false;
+          renderRow(containerId, arr, rowNum);
+        }
+      });
+
+      // Touch (mobile) — only within same row
+      let touchSrcIdx;
+      tile.addEventListener("touchstart", e => {
+        touchSrcIdx = idx;
+        tile.classList.add("selected");
+      }, {passive:true});
+      tile.addEventListener("touchend", e => {
+        tile.classList.remove("selected");
+        const t = e.changedTouches[0];
+        const el = document.elementFromPoint(t.clientX, t.clientY);
+        if (el && el.classList.contains("anagram-tile") && parseInt(el.dataset.row) === rowNum) {
+          const targetIdx = parseInt(el.dataset.idx);
+          if (targetIdx !== touchSrcIdx) {
+            const arr = rowNum === 1 ? tilesR1 : tilesR2;
+            [arr[touchSrcIdx], arr[targetIdx]] = [arr[targetIdx], arr[touchSrcIdx]];
+            hasChecked = false;
+            renderRow(containerId, arr, rowNum);
+          }
+        }
+      }, {passive:true});
+
+      container.appendChild(tile);
+    });
+  }
+
+  function checkArrangement() {
+    hasChecked = true;
+    renderRow("anagramRow1", tilesR1, 1);
+    renderRow("anagramRow2", tilesR2, 2);
+    const r1Ok = tilesR1.join("") === CORRECT_R1.join("");
+    const r2Ok = tilesR2.join("") === CORRECT_R2.join("");
+    const feedback = document.getElementById("anagramFeedback");
+    if (r1Ok && r2Ok) {
+      feedback.style.color = "var(--green)";
+      feedback.textContent = "✓ Both rows correct! Now verify the criminal using the hash below.";
+      document.getElementById("hashSection").classList.add("show");
+    } else {
+      feedback.style.color = "var(--text-dim)";
+      feedback.textContent = "Not quite — green = correct position, red = wrong. Swap within each row.";
+    }
+  }
+
+  // ══════════════════════════════════
+  //  SUSPECT SELECTION (one attempt)
+  // ══════════════════════════════════
+  function selectSuspect(name) {
+    if (suspectLocked) return;
+    suspectLocked = true;
+    document.querySelectorAll(".suspect-card").forEach(c => {
+      c.style.pointerEvents = "none";
+      c.style.opacity = "0.5";
+    });
+    if (name === CRIMINAL) {
+      logToSheet({ teamId, teamName, level: LEVEL, letter: CRIMINAL, action: "level_complete" });
+      document.getElementById("victoryScreen").classList.add("show");
+    } else {
+      logToSheet({ teamId, teamName, level: LEVEL, letter: name, action: "wrong_suspect" });
+      document.getElementById("wrongScreen").classList.add("show");
+    }
+  }
+
+  // ══════════════════════════════════
+  //  FAAH FINAL ANSWER
+  // ══════════════════════════════════
+  async function checkFaah() {
+    const input    = document.getElementById("faahInput");
+    const feedback = document.getElementById("faahFeedback");
+    const val      = input.value.trim().toUpperCase();
+    if (val === "FAAH") {
+      await logToSheet({ teamId, teamName, level: LEVEL, letter: "FAAH", action: "winner" });
+      document.getElementById("victoryScreen").classList.remove("show");
+      const ws = document.getElementById("winnerScreen");
+      ws.classList.add("show");
+      document.getElementById("winnerTeamName").textContent = teamName || teamId || "Your Team";
+      ws.innerHTML = ws.innerHTML.replace("{teamIdDisplay}", teamId || "—");
+    } else {
+      feedback.textContent = "✗ That's not it. Enter the funny word — the nature of the event as mentioned by the admin.";
+      input.classList.remove("shake"); void input.offsetWidth; input.classList.add("shake");
+      setTimeout(() => input.classList.remove("shake"), 500);
+    }
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      if (document.getElementById("faahInput") === document.activeElement) {
+        checkFaah();
+      }
+    }
+  });
+</script>
+</body>
+</html>
